@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    Hey Boi
+</body>
+<script> 
+    const evet = new EventSource('http://localhost:9000/event?user=user1')
+    evet.onmessage = (e) => {
+        console.log(JSON.parse(e.data));
+        
+    }
+    // evet.onerror = (e) => {
+    //     console.log("err");
+    //     // console.log(e);
+    // }
+    evet.onopen = (e) => {
+        console.log('open');
+        // console.log(e);
+    } 
+</script>
+</html>
