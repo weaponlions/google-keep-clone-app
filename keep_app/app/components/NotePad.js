@@ -122,15 +122,6 @@ const NotePad = ({ route, navigation }) => {
 								height: firstInputHeight,
 							}}
 							keyboardType="url"
-							style={
-								{
-									// borderWidth: 2,
-									// minHeight: 16,
-									// height: firstInputHeight,
-									// padding: 10,
-									// marginBottom: 20,
-								}
-							}
 							// onContentSizeChange={(e) => {
 							// 	// console.log(e);
 							// }}
