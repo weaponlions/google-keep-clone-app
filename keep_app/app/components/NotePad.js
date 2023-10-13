@@ -1,110 +1,133 @@
-import { View, Text, ScrollView, Image, SafeAreaView, StyleSheet, Keyboard, BackHandler, Alert } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  Image,
+  SafeAreaView,
+  StyleSheet,
+  Keyboard,
+  BackHandler,
+  Alert,
+} from "react-native";
 import React, { useEffect, useState } from "react";
-import { AppBar, IconButton, HStack, Button, Avatar, Icon, TextInput, } from "@react-native-material/core";
-import { useSelector, useDispatch,  } from "react-redux";
-import { addNote, addRecord, updateNote, removeRecord, deleteNote } from "../store/slices"; 
-import randomId from '../store/generator';  
+import {
+  AppBar,
+  IconButton,
+  HStack,
+  Button,
+  Avatar,
+  Icon,
+  TextInput,
+} from "@react-native-material/core";
+import { useSelector, useDispatch } from "react-redux";
+import {
+  addNote, 
+  updateNote, 
+  deleteNote,
+} from "../store/slices";
+import randomId from "../store/generator";
 
-
-const initialState = { title: '', description: '', color: '', id: '' };
+const initialState = { title: "", description: "", color: "", id: "" };
 const NotePad = ({ route, navigation }) => {
-    
-    const { noteId } = route.params; 
-    const [id, setId] = useState("");
-
-    const [oldSet, setOldSet] = useState(new Set());
-    const oldRecord = useSelector((state)=> state.record['id']);
-    const notesRecord = useSelector((state)=> state.notes['data']);
-
-    const [data, setData] = useState( initialState );
-    const [oldData, setOldData] = useState(data);
-    const dispatch = useDispatch();
-  
-    useEffect(() => {
-      // console.log("old", oldRecord);
-      setOldSet(new Set(oldRecord));
-    }, [oldRecord])
-
-  
-    useEffect(()=> { // get Id when new note create 
-        async function getNew () {
-            if (noteId == "" && id == "") { 
-                let id = await randomId(); 
-                setId(id);
-            }
-            else if(noteId != ""){
-              setId(noteId);
-              notesRecord.forEach(e => { // set old note data in data state
-                if (e.id == noteId) { 
-                  setData(e)
-                  return 
-                }
-              }); 
-            }
-        }
-        getNew();
-    }, [])
-
-    
-    useEffect(() => { 
-      const keybord = Keyboard.addListener('keyboardDidHide', async ()=>{
-        if (oldData.title != data.title || oldData.description != data.description) {
-          if (oldSet.has(id) || oldSet.has(noteId)) {
-            dispatch(updateNote({...data, id})); 
-          }
-          else{
-            dispatch(addRecord(id))
-            dispatch(addNote({...data, id}));
-          } 
-        }
-      }) 
-      return () => {
-          keybord.remove()
-      } 
-    }, [data]);
+  const { noteId } = route.params;
+  const [id, setId] = useState(noteId ?? null);
  
-    
-    useEffect(() => { 
-      // console.log("NA",data);
-      const back = navigation.addListener('beforeRemove', (e) => {
-        handleBlur()
-      }) 
-      return back;
-    }, [navigation, data])
+  const notesRecord = useSelector((state) => state.notes["data"]);
 
+  const [data, setData] = useState(initialState);
+  const [oldData, setOldData] = useState(data);
+  const dispatch = useDispatch();
+ 
+  useEffect(() => {
+    // get data when note is old
+    notesRecord.forEach((e) => { 
+      if (e.id == noteId) {
+        setData(e);
+        // setOldData(e);
+        return;
+      }
+    });
+  }, []);
 
-    const handleBlur = async () => { // focusOut in TextInput  
-      if (data.title != oldData.title || data.description != oldData.description) {  
-        if (oldSet.has(id) && data.title == "" && data.description == "") {
-          dispatch(removeRecord(id))
-          dispatch(deleteNote(id)); 
-        }
-        else if(oldSet.has(id)) {
-          dispatch(updateNote({...data, id}));
-        }
-        else{
-          dispatch(addRecord(id))
-          dispatch(addNote({...data, id}));
-        } 
+  const sendData = async () => {
+    if (id == null && (data.title != "" || data.description != "")) {
+      let newId = await randomId();
+      setId(newId); 
+      dispatch(addNote({ ...data, id: newId }));
+      console.log("send");
+    } 
+    else { 
+      if (data.title == "" && data.description == "") {  
+        dispatch(deleteNote(id));
+      }
+      else{
+        dispatch(updateNote({ ...data, id }));
+        console.log("update");
       }
     }
-     
-    
-    const handleFocus = async () => { // focusIn in TextInput 
-      setOldData({...data})  
-    }
+  };
+
+  useEffect(() => {
+    const keybord = Keyboard.addListener("keyboardDidHide", async () => {
+      await sendData();
+    });
+    return () => {
+      keybord.remove();
+    };
+  }, [data]);
+
+  useEffect(() => {
+    const back = navigation.addListener("beforeRemove", async (e) => {
+      console.log("back");
+      await sendData();
+    });
+    return back;
+  }, [navigation, data]);
+
+  const handleBlur = async () => {
+    // focusOut in TextInput
+    await sendData() 
+  };
  
-     
-    return (
+  const onTouchStart = (e) => {  
+    // console.log(e.target);
+  }
+
+
+  return (
     <>
-      <SafeAreaView style={{backgroundColor: '#fff'}} >
-        {/* <ScrollView keyboardShouldPersistTaps='always' style={{backgroundColor: '#fff', padding: 10 }}> */}
+      <SafeAreaView style={{ backgroundColor: "#fff" }}>
+        <ScrollView onTouchStart={onTouchStart} keyboardShouldPersistTaps='always' maintainVisibleContentPosition={true} style={{backgroundColor: '#fff', padding: 10, minHeight: '100%' }}>
 
-            <TextInput variant="text" value={data.title} onFocus={handleFocus} onBlur={handleBlur} onChangeText={(e)=> setData({...data, title: e})} placeholder="Title" multiline style={styles.textTitle} keyboardType="url" />  
+          <TextInput
+            variant="text"
+            value={data.title} 
+            onBlur={handleBlur}
+            onChangeText={(e) => setData({ ...data, title: e })}
+            placeholder="Title"
+            multiline
+            inputStyle={styles.textTitle}
+            keyboardType="url"
+            style={{
+              // borderWidth: 2,
+              minHeight: 16
+            }}
+            onContentSizeChange={(e) => {
+              console.log(e);
+            }}
+          />
 
-            <TextInput variant="text" value={data.description} onFocus={handleFocus} onBlur={handleBlur} onChangeText={(e)=> setData({...data, description: e})} placeholder="Note" multiline inputStyle={styles.textNote} /> 
-             
-        {/* </ScrollView> */}
+          <TextInput
+            variant="text"
+            value={data.description} 
+            onBlur={handleBlur}
+            onChangeText={(e) => setData({ ...data, description: e })}
+            placeholder="Note"
+            multiline
+            inputStyle={styles.textNote}
+          />
+
+        </ScrollView>
       </SafeAreaView>
       <AppBar
         variant="bottom"
@@ -148,16 +171,17 @@ const styles = StyleSheet.create({
     bottom: 0,
     end: 0,
   },
-  textNote:{ 
-    fontFamily: 'My_Font', 
-    // marginTop: 15, 
-    // fontSize: 18
+  textNote: {
+    fontFamily: "My_Font",
+    // marginTop: 15,
+    fontSize: 18
   },
-  textTitle:{
-    fontSize: 18, 
-    fontFamily: 'My_Font',
-    marginTop: 15, 
-  }
+  textTitle: {
+    fontSize: 19,
+    fontFamily: "My_Font",
+    // marginTop: 15, 
+    // borderWidth: 2, 
+  },
 });
 
 export default NotePad;

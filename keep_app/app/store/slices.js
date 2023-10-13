@@ -41,11 +41,10 @@ const notesSlice = createSlice({
     name: 'notes',
     initialState: {data: []},
     reducers: {
-        addNote(state, {type, payload}) {
-            state.data.push(payload);
-            // return {data: []}
+        addNote(state, {type, payload}) { 
+            state.data.push(payload); 
         },
-        loadNote(state, action) {
+        loadNote(state, action) { 
             return state
         },
         deleteNote(state, {type, payload}) {

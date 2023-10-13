@@ -17,9 +17,9 @@ const Home = ({navigation}) => {
   const [colorValue, setColorValue] = useState("")
 
   const handleMenu = () => { 
-    drawer.current.openDrawer();
+    // drawer.current.openDrawer();
   };
-
+  
   const handleSearch = () => {
     setBarShow((prev) => !prev);
     setColorValue("");
@@ -39,7 +39,7 @@ const Home = ({navigation}) => {
   };
 
   const handlePlus = () => {
-    navigation.navigate('notepad', {noteId: ""})
+    navigation.navigate('notepad', {noteId: null})
   }
 
   const DrawerBox = () => {
@@ -108,40 +108,6 @@ const Home = ({navigation}) => {
             />
           </View>  
           {/* <DrawerBox />  */}
-          <View>
-            <AppBar
-              leading={(props) => (
-                <HStack style={{marginTop: 50, alignItems: 'center'}}>
-                  <IconButton
-                    onPress={handleSearch}
-                    icon={(props) => (
-                      <Image
-                        style={{ width: 30, height: 30 }}
-                        source={require("../../assets/img/back.png")}
-                      />
-                    )}
-                  />
-                  <TextInput value={searchValue} onChangeText={(e) => setSearchValue(e)} variant="text" placeholder="Search your notes" style={{width: 285}} />
-                  {searchValue != "" && 
-                    (
-                    <IconButton
-                      onPress={()=> setSearchValue("")}
-                      icon={(props) => (
-                        <Avatar
-                          icon={(props) => (
-                            <Icon color={"#fff"} name="close" {...props} />
-                          )}
-                          color="fff"
-                        />
-                      )}
-                    />
-                    )}
-                </HStack>
-              )} 
-              contentContainerStyle={{marginTop: 15}}
-              style={[styles.hideAppbar, { display: barShow ? 'flex' : 'none' }]}
-            />
-          </View> 
           
           {
             !barShow && (<Notes gridView={gridView} colorValue={colorValue} searchValue={searchValue} />)
@@ -157,7 +123,7 @@ const Home = ({navigation}) => {
       <IconButton
         style={styles.plusBtn}
         icon={(props) => (
-          <Image {...props} source={require("../../assets/img/plus.png")} />
+          <Image {...props} style={{width: 50, height: 50}} source={require("../../assets/img/plus.png")} />
         )}
         onPress={handlePlus}
       /> 
@@ -168,16 +134,16 @@ const Home = ({navigation}) => {
 const styles = StyleSheet.create({
   appbar: {
     margin: 10,
-    borderRadius: 10,
+    borderRadius: 50,
     display: "flex",
     justifyContent: "center",
     padding: 0,
-    backgroundColor: "#fff",
+    backgroundColor: "#cfd9df",
     marginHorizontal: 20
   },
   title: {
     width: "75%",
-    backgroundColor: "#fff",
+    backgroundColor: "#cfd9df",
     height: 40,
     marginTop: 5,
   },
@@ -185,7 +151,8 @@ const styles = StyleSheet.create({
     marginLeft: -50,
     fontSize: 18,
     textTransform: "none",
-    fontFamily: 'My_Font'
+    fontFamily: 'My_Font',
+    color: "#000"
     
   },
   plusBtn: {
